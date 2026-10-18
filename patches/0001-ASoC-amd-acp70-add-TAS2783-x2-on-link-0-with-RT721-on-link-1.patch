@@ -1,0 +1,89 @@
+From d310d073ef930eea0117617529dce9e2c505ca1a Mon Sep 17 00:00:00 2001
+From: Kevin Hanson
+Date: Sat, 17 Oct 2026 23:03:54 -0700
+Subject: [PATCH] ASoC: amd: acp70: add TAS2783 x2 on link 0 with RT721 on link
+ 1
+
+Retail ASUS ROG Xbox Ally X units (PCI SSID 1043:1954) have their two
+TAS2783 speaker amps on SoundWire link 0 (unique IDs 8 and 0xb) and the
+RT721 headset codec on link 1. The BIOS selects this wiring when GPIO 104
+reads low; the existing acp70_rt721_l1u0_tas2783x2_l1u8b layout covers
+the boards that put the amps on link 1.
+
+Without a matching entry the machine driver falls back to
+acp70_rt721_only, so the card exposes the headset jack but no speakers.
+Add a two-link layout ahead of the RT721-only fallback.
+
+Assisted-by: Claude Opus 5.5 (Claude Code)
+---
+ sound/soc/amd/acp/amd-acp70-acpi-match.c | 47 ++++++++++++++++++++++++
+ 1 file changed, 47 insertions(+)
+
+diff --git a/sound/soc/amd/acp/amd-acp70-acpi-match.c b/sound/soc/amd/acp/amd-acp70-acpi-match.c
+index ccd01152c87d..b03929fe6793 100644
+--- a/sound/soc/amd/acp/amd-acp70-acpi-match.c
++++ b/sound/soc/amd/acp/amd-acp70-acpi-match.c
+@@ -659,6 +659,48 @@ static const struct snd_soc_acpi_link_adr acp70_rt721_l1u0_tas2783x2_l1u8b[] = {
+ 	{}
+ };
+ 
++static const struct snd_soc_acpi_adr_device tas2783x2_l0u8b_adr[] = {
++	{
++		.adr = 0x0000380102000001ull,
++		.num_endpoints = 1,
++		.endpoints = &spk_l_endpoint,
++		.name_prefix = "tas2783-1",
++	},
++	{
++		.adr = 0x00003B0102000001ull,
++		.num_endpoints = 1,
++		.endpoints = &spk_r_endpoint,
++		.name_prefix = "tas2783-2",
++	},
++};
++
++static const struct snd_soc_acpi_adr_device rt721_l1u0_jack_dmic_adr[] = {
++	{
++		.adr = 0x000130025D072101ull,
++		/*
++		 * On this platform speakers are provided by two TAS2783 amps
++		 * on link 0. Keep rt721 as UAJ + DMIC only.
++		 */
++		.num_endpoints = ARRAY_SIZE(jack_dmic_endpoints),
++		.endpoints = jack_dmic_endpoints,
++		.name_prefix = "rt721",
++	},
++};
++
++static const struct snd_soc_acpi_link_adr acp70_tas2783x2_l0u8b_rt721_l1u0[] = {
++	{
++		.mask = BIT(0),
++		.num_adr = ARRAY_SIZE(tas2783x2_l0u8b_adr),
++		.adr_d = tas2783x2_l0u8b_adr,
++	},
++	{
++		.mask = BIT(1),
++		.num_adr = ARRAY_SIZE(rt721_l1u0_jack_dmic_adr),
++		.adr_d = rt721_l1u0_jack_dmic_adr,
++	},
++	{}
++};
++
+ static const struct snd_soc_acpi_endpoint rt721_endpoints[] = {
+ 	{ /* Jack Playback/Capture Endpoint (AIF1) */
+ 		.num = 0,
+@@ -790,6 +832,11 @@ struct snd_soc_acpi_mach snd_soc_acpi_amd_acp70_sdw_machines[] = {
+ 		.machine_check = snd_soc_acpi_amd_sdca_is_device_rt712_vb,
+ 		.drv_name = "amd_sdw",
+ 	},
++	{
++		.link_mask = BIT(0) | BIT(1),
++		.links = acp70_tas2783x2_l0u8b_rt721_l1u0,
++		.drv_name = "amd_sdw",
++	},
+ 	{
+ 		.link_mask = BIT(1),
+ 		.links = acp70_rt721_l1u0_tas2783x2_l1u8b,
+-- 
+2.55.0
+
