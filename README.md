@@ -28,8 +28,7 @@ Open **Desktop Mode**, start **Konsole**, and run:
 
 ```sh
 git clone https://github.com/SupremeRetroGaming/rog-ally-x20-steamos-speakers.git
-cd rog-ally-x20-steamos-speakers
-sudo ./ally-audio-fix-debian.sh install
+sudo /home/pi/rog-ally-x20-steamos-speakers/ally-audio-fix-debian.sh install
 ```
 
 ```sh
