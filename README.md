@@ -29,7 +29,7 @@ Open **Desktop Mode**, start **Konsole**, and run:
 ```sh
 git clone https://github.com/SupremeRetroGaming/rog-ally-x20-steamos-speakers.git
 cd rog-ally-x20-steamos-speakers
-sudo ./ally-audio-fix-debain.sh install
+sudo ./ally-audio-fix-debian.sh install
 ```
 
 ```sh
@@ -42,6 +42,10 @@ Then reboot. If you have never set a password for the `deck` user, run `passwd` 
 that `sudo` works.
 
 To check that it worked, run:
+
+```sh
+sudo ./ally-audio-fix-debian.sh status
+```
 
 ```sh
 sudo ./ally-audio-fix.sh status
