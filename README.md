@@ -27,6 +27,12 @@ refuses to run if it doesn't match.
 Open **Desktop Mode**, start **Konsole**, and run:
 
 ```sh
+git clone https://github.com/SupremeRetroGaming/rog-ally-x20-steamos-speakers.git
+cd rog-ally-x20-steamos-speakers
+sudo ./ally-audio-fix-debain.sh install
+```
+
+```sh
 git clone https://github.com/hungarianhc/rog-ally-x20-steamos-speakers.git
 cd rog-ally-x20-steamos-speakers
 sudo ./ally-audio-fix.sh install
